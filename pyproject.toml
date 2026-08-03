@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cloud-steward"
+version = "0.1.0"
+description = "A context-aware, approval-first infrastructure operations agent"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Oluwamayowa Oladosu" }]
+dependencies = [
+  "fastapi>=0.116,<1",
+  "google-genai>=1.30,<2",
+  "httpx>=0.28,<1",
+  "mcp>=1.13,<2",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic-settings>=2.10,<3",
+  "sqlalchemy>=2.0,<3",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.1,<2",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+cloud-steward = "cloud_steward.main:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cloud_steward"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

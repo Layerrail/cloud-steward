@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8088:8080"
+    environment:
+      DATABASE_URL: postgresql+psycopg://root@cockroach:26257/cloud_steward?sslmode=disable
+      DATAHUB_GMS_URL: ${DATAHUB_GMS_URL:-}
+      DATAHUB_GMS_TOKEN: ${DATAHUB_GMS_TOKEN:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+      cockroach-init:
+        condition: service_completed_successfully
+
+  cockroach:
+    image: cockroachdb/cockroach:v26.2.0
+    command: start-single-node --insecure --listen-addr=0.0.0.0
+    ports:
+      - "26257:26257"
+      - "8089:8080"
+    volumes:
+      - cockroach-data:/cockroach/cockroach-data
+    healthcheck:
+      test: ["CMD", "cockroach", "node", "status", "--insecure", "--host=localhost:26257"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+
+  cockroach-init:
+    image: cockroachdb/cockroach:v26.2.0
+    depends_on:
+      cockroach:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["cockroach sql --insecure --host=cockroach:26257 -e 'CREATE DATABASE IF NOT EXISTS cloud_steward'"]
+
+volumes:
+  cockroach-data:

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cloud Steward turns governed infrastructure context into reversible, approval-first action plans.">
+  <title>Cloud Steward · Infrastructure decisions with receipts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Cloud Steward home">
+      <span class="brand-mark"><span></span><span></span><span></span></span>
+      <span>Cloud Steward</span>
+    </a>
+    <div class="topbar-right">
+      <span class="live-dot"><i></i> approval-first</span>
+      <a class="ghost-link" href="/docs">API docs ↗</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Governed infrastructure operations</p>
+        <h1>Every cloud action should know its <em>blast radius.</em></h1>
+        <p class="hero-lead">Cloud Steward reads ownership, lineage, deployment evidence, and prior decisions before it proposes a change. Nothing executes without a named human approval.</p>
+        <div class="hero-actions">
+          <button class="primary-button" data-scroll-to="composer">Draft a safe plan <span>→</span></button>
+          <button class="text-button" data-demo>Load incident demo</button>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="Context to action flow">
+        <div class="orbital orbital-one"></div>
+        <div class="orbital orbital-two"></div>
+        <div class="core-card">
+          <div class="core-head"><span>CS</span><i></i></div>
+          <strong>Steward loop</strong>
+          <small>context → plan → approve → verify</small>
+        </div>
+        <div class="signal-card signal-datahub"><span>01</span><b>DataHub</b><small>lineage + ownership</small></div>
+        <div class="signal-card signal-gemini"><span>02</span><b>Gemini</b><small>structured planning</small></div>
+        <div class="signal-card signal-memory"><span>03</span><b>Memory</b><small>durable decisions</small></div>
+      </div>
+    </section>
+
+    <section class="metrics" id="metrics">
+      <article><span class="metric-value" id="integration-count">—</span><span>integrations visible</span></article>
+      <article><span class="metric-value">0</span><span>automatic mutations</span></article>
+      <article><span class="metric-value" id="plan-count">—</span><span>audited proposals</span></article>
+      <article><span class="metric-value" id="arch">—</span><span>runtime architecture</span></article>
+    </section>
+
+    <section class="workspace" id="composer">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Decision workspace</p>
+          <h2>Turn an operational goal into a reversible plan.</h2>
+        </div>
+        <p>Metadata is treated as untrusted evidence. Mutations are proposals—not side effects.</p>
+      </div>
+
+      <div class="workspace-grid">
+        <form class="composer" id="plan-form">
+          <div class="field-group">
+            <label for="goal">Operational goal</label>
+            <textarea id="goal" name="goal" rows="5" minlength="8" required placeholder="Reduce checkout latency without breaking invoice generation or downstream reporting."></textarea>
+            <span class="field-note">Describe the outcome, not a shell command.</span>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="context-query">Context search</label>
+              <input id="context-query" name="context_query" required value="checkout billing invoice production">
+            </div>
+            <div class="field-group compact">
+              <label for="environment">Environment</label>
+              <select id="environment" name="environment">
+                <option value="production">Production</option>
+                <option value="staging">Staging</option>
+                <option value="development">Development</option>
+              </select>
+            </div>
+          </div>
+          <div class="guardrail-row">
+            <div><i>✓</i><span><b>Dry run</b><small>No infrastructure execution</small></span></div>
+            <div><i>✓</i><span><b>Human gate</b><small>Named approval required</small></span></div>
+          </div>
+          <button class="primary-button submit" type="submit"><span class="button-label">Generate governed plan</span><span class="button-arrow">→</span></button>
+          <p class="form-error" id="form-error" role="alert"></p>
+        </form>
+
+        <aside class="integration-panel">
+          <div class="panel-head"><span>Integration state</span><i id="system-state">checking</i></div>
+          <div id="integrations" class="integration-list">
+            <div class="integration-skeleton"></div>
+            <div class="integration-skeleton"></div>
+            <div class="integration-skeleton"></div>
+          </div>
+          <div class="safeguards">
+            <span>Hard guardrails</span>
+            <ul id="safeguards"></ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="result-section" id="result-section" hidden>
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">Proposed action plan</p><h2 id="result-title">Awaiting context</h2></div>
+        <span class="risk-chip" id="risk-chip">risk</span>
+      </div>
+      <div class="context-banner" id="context-banner"></div>
+      <div class="plan-layout">
+        <div class="timeline" id="plan-actions"></div>
+        <aside class="approval-card">
+          <span class="approval-icon">⌁</span>
+          <p class="eyebrow">Execution boundary</p>
+          <h3>Approval records intent. It does not run the plan.</h3>
+          <p>Execution remains a separate integration boundary so reviewers can compare the exact plan hash, scope, and rollback.</p>
+          <button class="secondary-button" id="approve-button">Record demo approval</button>
+          <small id="approval-status">No approval recorded</small>
+        </aside>
+      </div>
+    </section>
+
+    <section class="history-section">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">Durable decision memory</p><h2>Plans leave receipts.</h2></div>
+        <button class="text-button" id="refresh-history">Refresh</button>
+      </div>
+      <div id="history" class="history-list"><p class="empty">No plans yet. Draft the first governed action.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Cloud Steward · Built in public, August 2026</span>
+    <span>Apache-2.0 · DataHub MCP · Gemini · CockroachDB · Arm64</span>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

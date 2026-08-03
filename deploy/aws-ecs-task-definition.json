@@ -1,0 +1,46 @@
+{
+  "family": "cloud-steward-arm64",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "ARM64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "containerDefinitions": [
+    {
+      "name": "cloud-steward",
+      "image": "REPLACE_WITH_ECR_IMAGE",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "APP_ENV", "value": "production" },
+        { "name": "REQUIRE_APPROVAL", "value": "true" },
+        { "name": "ALLOW_MUTATIONS", "value": "false" }
+      ],
+      "secrets": [
+        { "name": "DATABASE_URL", "valueFrom": "REPLACE_WITH_SECRET_ARN:DATABASE_URL::" },
+        { "name": "GEMINI_API_KEY", "valueFrom": "REPLACE_WITH_SECRET_ARN:GEMINI_API_KEY::" },
+        { "name": "DATAHUB_GMS_TOKEN", "valueFrom": "REPLACE_WITH_SECRET_ARN:DATAHUB_GMS_TOKEN::" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')\" || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 20
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/cloud-steward",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "app"
+        }
+      }
+    }
+  ]
+}

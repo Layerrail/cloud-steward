@@ -1,0 +1,27 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cloud-steward
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "3"
+    spec:
+      containerConcurrency: 20
+      timeoutSeconds: 60
+      containers:
+        - image: REPLACE_WITH_ARTIFACT_REGISTRY_IMAGE
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_ENV
+              value: production
+            - name: REQUIRE_APPROVAL
+              value: "true"
+            - name: ALLOW_MUTATIONS
+              value: "false"
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
