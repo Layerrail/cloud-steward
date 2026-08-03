@@ -3,6 +3,7 @@
 .venv
 .env
 .gemini-key.tmp
+.render.env.tmp
 __pycache__
 .pytest_cache
 .ruff_cache

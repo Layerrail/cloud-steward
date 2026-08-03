@@ -22,3 +22,7 @@ def test_plan_store_persists_context_and_named_approval(tmp_path) -> None:
     assert approved["status"] == "approved"
     assert approved["approved_by"] == "test-reviewer"
     assert approved["context"]["provider"] == "sample-datahub-context"
+
+    results = store.search_similar("Inspect billing health before scaling")
+    assert results[0]["plan_id"] == str(plan.id)
+    assert results[0]["provider"] == "local-deterministic-fallback"

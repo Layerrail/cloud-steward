@@ -47,6 +47,35 @@ jobs:
           push: false
           tags: cloud-steward:arm64-ci
 
+  cockroach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start Cloud Steward and CockroachDB
+        run: docker compose up -d --build --wait --wait-timeout 120
+      - name: Verify durable vector memory
+        run: |
+          curl --fail http://127.0.0.1:8088/healthz
+          curl --fail \
+            --header 'Content-Type: application/json' \
+            --data '{"goal":"Protect invoices while scaling checkout","context_query":"checkout billing","environment":"production","dry_run":true}' \
+            http://127.0.0.1:8088/api/plans
+          curl --fail 'http://127.0.0.1:8088/api/memory/search?query=checkout%20capacity'
+          docker compose exec -T cockroach cockroach sql \
+            --url='postgresql://steward:cloud-steward-local-only@127.0.0.1:26257/cloud_steward?sslmode=require' \
+            --execute='SHOW INDEXES FROM steward_memory_vector'
+      - name: Collect logs
+        if: always()
+        run: docker compose logs --no-color > artifacts-compose.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cockroach-compose-logs
+          path: artifacts-compose.log
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
+
   gemini:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'pull_request' }}

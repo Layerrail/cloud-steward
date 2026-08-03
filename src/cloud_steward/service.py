@@ -28,3 +28,6 @@ class StewardService:
     def approve(self, plan_id: str, approval: ApprovalRequest) -> dict | None:
         """Records approval only. Execution is intentionally a separate, unimplemented boundary."""
         return self.store.approve(plan_id, approval)
+
+    def search_memory(self, query: str, limit: int = 5) -> list[dict]:
+        return self.store.search_similar(query, limit)

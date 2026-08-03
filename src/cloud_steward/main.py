@@ -71,14 +71,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     detail=f"Structured action planning with {settings.gemini_model}",
                 ),
                 IntegrationStatus(
-                    name="CockroachDB memory",
-                    configured=settings.database_url.startswith(("cockroachdb", "postgres")),
+                    name="CockroachDB vector memory",
+                    configured=store.vector_index_enabled,
                     mode=(
                         "distributed"
-                        if settings.database_url.startswith(("cockroachdb", "postgres"))
+                        if store.vector_index_enabled
                         else "local"
                     ),
-                    detail="Plan, context, approval, and incident audit trail",
+                    detail="Durable decisions plus semantic recall through a VECTOR index",
                 ),
             ],
         )
@@ -90,6 +90,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/plans")
     async def list_plans() -> list[dict]:
         return service.list_plans()
+
+    @app.get("/api/memory/search")
+    async def search_memory(query: str, limit: int = 5) -> list[dict]:
+        bounded_limit = max(1, min(limit, 20))
+        return service.search_memory(query, bounded_limit)
 
     @app.post("/api/plans/{plan_id}/approve")
     async def approve_plan(plan_id: str, approval: ApprovalRequest) -> dict:

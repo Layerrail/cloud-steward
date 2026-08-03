@@ -4,6 +4,10 @@
 
 Cloud Steward is a new standalone project started on **2026-08-02**. It is not a relabeling of LayerRail and does not copy or relicense LayerRail's AGPL source. A future LayerRail connector will use documented network APIs.
 
+**[Open the live demo](https://cloud-steward.onrender.com)** · **[Watch the 44-second walkthrough](https://youtu.be/tI2ZgGVbZcA)**
+
+![Cloud Steward dashboard](docs/images/cloud-steward-hero.png)
+
 ## Why it exists
 
 Cloud incidents rarely fail because a team cannot run a command. They fail because the operator does not have enough context:
@@ -20,7 +24,8 @@ Cloud Steward makes those questions part of the action path.
 
 - Collect governed metadata through the open-source **DataHub MCP Server**.
 - Generate schema-constrained plans with **Gemini**.
-- Persist context, plans, and named approvals in **CockroachDB/PostgreSQL** or local SQLite.
+- Persist context, plans, and named approvals in **CockroachDB** or local SQLite.
+- Recall related decisions through a CockroachDB `VECTOR(8)` cosine index, with a disclosed deterministic local fallback.
 - Explain the target, reason, expected outcome, verification, rollback, and risk of every action.
 - Default to dry-run and expose **no execution endpoint**.
 - Run as a multi-architecture container, including Linux/Arm64.
@@ -51,6 +56,10 @@ Requirements: Python 3.12+.
 5. Open `http://localhost:8080`.
 
 Without external credentials, the app runs in a fully disclosed demo mode with deterministic planning, sample DataHub context, and local SQLite memory.
+
+## Reproduce the demo assets
+
+Install development dependencies and Playwright's recording codec, then run `python scripts/record_demo.py`. The script records the public deployment with the installed Microsoft Edge browser and writes screenshots under `docs/images/`; generated video artifacts remain gitignored.
 
 ## Run with CockroachDB
 
@@ -85,6 +94,7 @@ On Google Cloud Run, set `GOOGLE_GENAI_USE_VERTEXAI=true`, `GOOGLE_CLOUD_PROJECT
 - `GET /api/status` — runtime and integration modes without secret values.
 - `POST /api/plans` — collect context and create a proposed plan.
 - `GET /api/plans` — list durable decision records.
+- `GET /api/memory/search?query=...` — retrieve semantically related prior decisions.
 - `POST /api/plans/{id}/approve` — record named approval only.
 - `GET /healthz` — health probe.
 - `GET /docs` — OpenAPI UI.

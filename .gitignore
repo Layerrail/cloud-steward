@@ -5,7 +5,9 @@ __pycache__/
 .venv/
 .env
 .gemini-key.tmp
+.render.env.tmp
 var/
+artifacts/
 dist/
 build/
 *.egg-info/
