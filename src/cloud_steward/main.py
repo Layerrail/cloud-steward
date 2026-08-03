@@ -23,8 +23,9 @@ from cloud_steward.settings import Settings, get_settings
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     store = PlanStore(settings.database_url)
+    context_provider = DataHubContextProvider(settings)
     service = StewardService(
-        context_provider=DataHubContextProvider(settings),
+        context_provider=context_provider,
         planner=PlanGenerator(settings),
         store=store,
     )
@@ -61,7 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 IntegrationStatus(
                     name="DataHub MCP",
                     configured=settings.datahub_enabled,
-                    mode="live" if settings.datahub_enabled else "sample",
+                    mode=context_provider.runtime_mode,
                     detail="Governed metadata, lineage, ownership, and impact context",
                 ),
                 IntegrationStatus(

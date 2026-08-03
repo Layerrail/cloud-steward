@@ -23,6 +23,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+datahub = [
+  "mcp-server-datahub>=0.6,<1",
+]
 dev = [
   "playwright>=1.62,<2",
   "pytest>=8.4,<9",

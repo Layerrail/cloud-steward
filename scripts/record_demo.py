@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -6,7 +7,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
 IMAGES = ROOT / "docs" / "images"
 EDGE = Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
-URL = "https://cloud-steward.onrender.com"
+URL = os.getenv("CLOUD_STEWARD_DEMO_URL", "https://cloud-steward.onrender.com")
+NAME = os.getenv("CLOUD_STEWARD_DEMO_NAME", "demo")
+GOAL = os.getenv("CLOUD_STEWARD_DEMO_GOAL")
+CONTEXT_QUERY = os.getenv("CLOUD_STEWARD_DEMO_CONTEXT_QUERY")
 
 
 def record() -> None:
@@ -21,19 +25,32 @@ def record() -> None:
             color_scheme="light",
         )
         page = context.new_page()
-        page.goto(URL, wait_until="networkidle", timeout=120_000)
-        page.screenshot(path=IMAGES / "cloud-steward-hero.png", full_page=False)
+        page.route("https://fonts.googleapis.com/**", lambda route: route.abort())
+        page.route("https://fonts.gstatic.com/**", lambda route: route.abort())
+        page.goto(URL, wait_until="domcontentloaded", timeout=120_000)
+        page.locator("#integrations .integration").first.wait_for(timeout=30_000)
+        page.screenshot(path=IMAGES / f"cloud-steward-{NAME}-hero.png", full_page=False)
+        print("Captured integration status", flush=True)
         page.wait_for_timeout(5_000)
 
-        page.locator("[data-demo]").click()
-        page.locator("#composer").scroll_into_view_if_needed()
+        if GOAL:
+            page.locator("#goal").fill(GOAL)
+        else:
+            page.locator("[data-demo]").click()
+        if CONTEXT_QUERY:
+            page.locator("#context-query").fill(CONTEXT_QUERY)
+        page.locator("#composer").evaluate(
+            "element => element.scrollIntoView({block: 'start'})"
+        )
         page.wait_for_timeout(5_000)
 
         page.locator("#plan-form").evaluate("form => form.requestSubmit()")
-        page.locator("#result-section").wait_for(state="visible", timeout=30_000)
+        print("Submitted governed plan request", flush=True)
+        page.locator("#result-section").wait_for(state="visible", timeout=300_000)
+        print("Received governed plan", flush=True)
         page.locator("#result-section").scroll_into_view_if_needed()
         page.wait_for_timeout(6_000)
-        page.screenshot(path=IMAGES / "cloud-steward-plan.png", full_page=False)
+        page.screenshot(path=IMAGES / f"cloud-steward-{NAME}-plan.png", full_page=False)
 
         for action in page.locator(".action-item").all():
             action.scroll_into_view_if_needed()
@@ -50,9 +67,10 @@ def record() -> None:
         video = page.video
         if video is None:
             raise RuntimeError("Playwright did not create a video")
-        page.close()
-        video.save_as(ARTIFACTS / "cloud-steward-demo-silent.webm")
         context.close()
+        print("Finalized browser recording", flush=True)
+        video.save_as(ARTIFACTS / f"cloud-steward-{NAME}-silent.webm")
+        print("Saved browser recording", flush=True)
         browser.close()
 
 

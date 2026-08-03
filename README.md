@@ -1,10 +1,12 @@
 # Cloud Steward
 
+[![CI](https://github.com/Layerrail/cloud-steward/actions/workflows/ci.yml/badge.svg)](https://github.com/Layerrail/cloud-steward/actions/workflows/ci.yml)
+
 **Infrastructure decisions with receipts.** Cloud Steward turns governed metadata into reversible, approval-first action plans for small teams that cannot staff a full platform organization.
 
 Cloud Steward is a new standalone project started on **2026-08-02**. It is not a relabeling of LayerRail and does not copy or relicense LayerRail's AGPL source. A future LayerRail connector will use documented network APIs.
 
-**[Open the live demo](https://cloud-steward.onrender.com)** · **[Watch the 44-second walkthrough](https://youtu.be/tI2ZgGVbZcA)**
+**[Open the live demo](https://cloud-steward.onrender.com)** · **[Watch the live DataHub MCP walkthrough](https://youtu.be/xW0RnBrROeA)**
 
 ![Cloud Steward dashboard](docs/images/cloud-steward-hero.png)
 
@@ -30,6 +32,27 @@ Cloud Steward makes those questions part of the action path.
 - Default to dry-run and expose **no execution endpoint**.
 - Run as a multi-architecture container, including Linux/Arm64.
 - Provide a public demo mode with realistic sample metadata when integrations are not configured.
+
+## Verified evidence
+
+[CI run 30781828308](https://github.com/Layerrail/cloud-steward/actions/runs/30781828308) passed on 2026-08-03 with:
+
+- Python 3.12 and 3.13 lint and test jobs;
+- a native GitHub-hosted Arm64 container build and 1,000-iteration benchmark on `aarch64` (0.0105 ms median, 0.0108 ms p95 for deterministic plan generation);
+- a secure CockroachDB Compose run that creates a plan, searches decision memory, and verifies `steward_memory_embedding_idx`; and
+- live Gemini schema-constrained planning through a masked repository secret.
+
+These isolated workflows prove the integration paths; they do not change the public Render demo's disclosed sample/deterministic/local modes.
+
+On 2026-08-03, a separate local evidence run used DataHub Core v1.5.0.6,
+the official `showcase-ecommerce` datapack, and open-source DataHub MCP tools
+`search`, `get_entities`, and `get_lineage`. The captured result contains eight
+governed resources, named ownership, glossary and structured-property context,
+health signals, and one-hop upstream/downstream lineage. See
+[`docs/evidence/datahub-context.json`](docs/evidence/datahub-context.json) and
+its SHA-256 sidecar and the
+[104-second live integration walkthrough](https://youtu.be/xW0RnBrROeA). This
+local proof does not imply the public Render service is configured with DataHub.
 
 ## Safety model
 
@@ -79,9 +102,23 @@ Set `DATAHUB_MCP_URL` to the tenant MCP endpoint and `DATAHUB_GMS_TOKEN` to a sc
 
 ### Self-hosted DataHub Core
 
-Install `uv`, configure `DATAHUB_GMS_URL` and an optional `DATAHUB_GMS_TOKEN`, and leave `DATAHUB_MCP_URL` empty. Cloud Steward launches the open-source `mcp-server-datahub` process through `uvx`, discovers its available tools, and selects a read-only search tool.
+Install the DataHub extra with `pip install -e ".[datahub]"`, configure `DATAHUB_GMS_URL` and an optional `DATAHUB_GMS_TOKEN`, and leave `DATAHUB_MCP_URL` empty. Cloud Steward launches the open-source `mcp-server-datahub` module in the same Python environment, discovers its available tools, searches the catalog, retrieves entity governance, and collects one-hop upstream and downstream lineage.
 
-The app does not enable DataHub mutation tools.
+The app explicitly disables DataHub mutation, user, and document tools for this context path.
+
+With DataHub Core running and populated, execute `python scripts/capture_datahub_evidence.py`. The script requires a live `datahub-mcp` response; verifies `search`, `get_entities`, and `get_lineage` plus governance and lineage results; rejects credential-like content; and writes the governed context snapshot to `docs/evidence/datahub-context.json`.
+
+A complete local evidence sequence is:
+
+1. Start the official development stack with `datahub docker quickstart`.
+2. Configure its CLI with `datahub init --username datahub --password datahub`.
+3. Load the official rich lineage sample with `datahub datapack load showcase-ecommerce`.
+  On Windows, use `python scripts/load_datahub_showcase.py --no-cache`; DataHub CLI
+  1.6.0.17 otherwise interprets the `C:` drive prefix as an unregistered URL scheme.
+4. Set `DATAHUB_GMS_URL=http://127.0.0.1:8080` in the Cloud Steward process.
+5. Run the evidence script and inspect the resulting ownership, tags, and lineage before publishing it.
+
+The DataHub quickstart uses development credentials and host-bound backend ports; it is not a production deployment.
 
 ## Connect Gemini
 

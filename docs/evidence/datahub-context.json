@@ -1,0 +1,137 @@
+{
+  "query": "/q orders",
+  "provider": "datahub-mcp",
+  "tool": "search, get_entities, get_lineage",
+  "resources": [
+    {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)",
+      "name": "orders",
+      "kind": "dataset",
+      "owner": "Fiona Green",
+      "environment": "PROD",
+      "tags": [],
+      "upstream": [
+        "export_table_orders_to_s3"
+      ],
+      "downstream": [
+        "import_table_orders_to_snowflake"
+      ],
+      "evidence": [
+        "Platform: s3",
+        "Glossary terms: PII, Order Total",
+        "Data Freshness SLA: Weekly",
+        "Data Quality Score: 75.6",
+        "Retention Period: 1 year",
+        "Cost Center: Analytics",
+        "Data Owner Escalation Contact: urn:li:corpuser:b2fd91.marty@example.com",
+        "INCIDENTS: PASS"
+      ]
+    },
+    {
+      "urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)",
+      "name": "ORDERS",
+      "kind": "dataset",
+      "owner": "Priya Sharma",
+      "environment": "PROD",
+      "tags": [
+        "\ud83d\udcb2 Large Table",
+        "\ud83d\udcc8 Most Queried"
+      ],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "Platform: snowflake",
+        "Glossary terms: PII, Order Total, Revenue by Customer Class",
+        "Data Freshness SLA: Real-time",
+        "Data Quality Score: 81.8",
+        "Retention Period: 90 days",
+        "Cost Center: Engineering",
+        "Data Owner Escalation Contact: urn:li:corpuser:b2fd91.patrick1@example.com",
+        "INCIDENTS: PASS"
+      ]
+    },
+    {
+      "urn": "urn:li:chart:(tableau,b2fd91.89f38fd7-058d-b66a-6db0-4f85f105468a)",
+      "name": "Orders By Month",
+      "kind": "chart",
+      "owner": "David Kim",
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "Platform: tableau",
+        "INCIDENTS: PASS"
+      ]
+    },
+    {
+      "urn": "urn:li:chart:(looker,b2fd91.dashboard_elements.224)",
+      "name": "Orders by Day",
+      "kind": "chart",
+      "owner": null,
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "Platform: looker",
+        "INCIDENTS: PASS"
+      ]
+    },
+    {
+      "urn": "urn:li:glossaryTerm:b2fd91.42266719-3cab-42b8-a8d2-49d782876dbc",
+      "name": "Order Total",
+      "kind": "glossaryterm",
+      "owner": null,
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "The\u00a0total monetary value of an order, including\u00a0all line items, discounts,\u00a0and applicable taxes. Calculated as\u00a0the sum of all\u00a0line item totals for a given order.\n\nSQL Calculation:\n\n\\- Single order: Use column 'order\\_total' directly\n\n\\- Aggregate total revenue: SUM(order\\_total)\n\n\\- Average order value: AVG(order\\_total)\n\n\\- Count orders: COUNT(DISTINCT order\\_id)\n\nExample queries:\n\n\\- Total revenue: SELECT SUM(order\\_total) FROM order\\_entry\\_db.analytics.order\\_details\n\n\\- Average order value:"
+      ]
+    },
+    {
+      "urn": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_order_items_to_snowflake,b2fd91.default),b2fd91.import_table_order_items_to_snowflake)",
+      "name": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_order_items_to_snowflake,b2fd91.default),b2fd91.import_table_order_items_to_snowflake)",
+      "kind": "data-job",
+      "owner": null,
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": []
+    },
+    {
+      "urn": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)",
+      "name": "import_table_orders_to_snowflake",
+      "kind": "data-job",
+      "owner": null,
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "Glossary terms: Order Total",
+        "INCIDENTS: PASS"
+      ]
+    },
+    {
+      "urn": "urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.export_table_orders_to_s3,b2fd91.default),b2fd91.export_table_orders_to_s3)",
+      "name": "export_table_orders_to_s3",
+      "kind": "data-job",
+      "owner": "Data Platform Team",
+      "environment": null,
+      "tags": [],
+      "upstream": [],
+      "downstream": [],
+      "evidence": [
+        "Domain: Data Platform Team",
+        "Glossary terms: Order Total",
+        "INCIDENTS: PASS"
+      ]
+    }
+  ],
+  "raw_excerpt": "{\"mcp_tools\": [\"search\", \"get_entities\", \"get_lineage\"], \"search_total\": 147, \"resources\": [{\"urn\": \"urn:li:dataset:(urn:li:dataPlatform:s3,b2fd91.demo-data-bucket/order_entry/orders,PROD)\", \"name\": \"orders\", \"kind\": \"dataset\", \"owner\": \"Fiona Green\", \"environment\": \"PROD\", \"tags\": [], \"upstream\": [\"export_table_orders_to_s3\"], \"downstream\": [\"import_table_orders_to_snowflake\"], \"evidence\": [\"Platform: s3\", \"Glossary terms: PII, Order Total\", \"Data Freshness SLA: Weekly\", \"Data Quality Score: 75.6\", \"Retention Period: 1 year\", \"Cost Center: Analytics\", \"Data Owner Escalation Contact: urn:li:corpuser:b2fd91.marty@example.com\", \"INCIDENTS: PASS\"]}, {\"urn\": \"urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.orders,PROD)\", \"name\": \"ORDERS\", \"kind\": \"dataset\", \"owner\": \"Priya Sharma\", \"environment\": \"PROD\", \"tags\": [\"\\ud83d\\udcb2 Large Table\", \"\\ud83d\\udcc8 Most Queried\"], \"upstream\": [], \"downstream\": [], \"evidence\": [\"Platform: snowflake\", \"Glossary terms: PII, Order Total, Revenue by Customer Class\", \"Data Freshness SLA: Real-time\", \"Data Quality Score: 81.8\", \"Retention Period: 90 days\", \"Cost Center: Engineering\", \"Data Owner Escalation Contact: urn:li:corpuser:b2fd91.patrick1@example.com\", \"INCIDENTS: PASS\"]}, {\"urn\": \"urn:li:chart:(tableau,b2fd91.89f38fd7-058d-b66a-6db0-4f85f105468a)\", \"name\": \"Orders By Month\", \"kind\": \"chart\", \"owner\": \"David Kim\", \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": [\"Platform: tableau\", \"INCIDENTS: PASS\"]}, {\"urn\": \"urn:li:chart:(looker,b2fd91.dashboard_elements.224)\", \"name\": \"Orders by Day\", \"kind\": \"chart\", \"owner\": null, \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": [\"Platform: looker\", \"INCIDENTS: PASS\"]}, {\"urn\": \"urn:li:glossaryTerm:b2fd91.42266719-3cab-42b8-a8d2-49d782876dbc\", \"name\": \"Order Total\", \"kind\": \"glossaryterm\", \"owner\": null, \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": [\"The\\u00a0total monetary value of an order, including\\u00a0all line items, discounts,\\u00a0and applicable taxes. Calculated as\\u00a0the sum of all\\u00a0line item totals for a given order.\\n\\nSQL Calculation:\\n\\n\\\\- Single order: Use column 'order\\\\_total' directly\\n\\n\\\\- Aggregate total revenue: SUM(order\\\\_total)\\n\\n\\\\- Average order value: AVG(order\\\\_total)\\n\\n\\\\- Count orders: COUNT(DISTINCT order\\\\_id)\\n\\nExample queries:\\n\\n\\\\- Total revenue: SELECT SUM(order\\\\_total) FROM order\\\\_entry\\\\_db.analytics.order\\\\_details\\n\\n\\\\- Average order value:\"]}, {\"urn\": \"urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_order_items_to_snowflake,b2fd91.default),b2fd91.import_table_order_items_to_snowflake)\", \"name\": \"urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_order_items_to_snowflake,b2fd91.default),b2fd91.import_table_order_items_to_snowflake)\", \"kind\": \"data-job\", \"owner\": null, \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": []}, {\"urn\": \"urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.import_table_orders_to_snowflake,b2fd91.default),b2fd91.import_table_orders_to_snowflake)\", \"name\": \"import_table_orders_to_snowflake\", \"kind\": \"data-job\", \"owner\": null, \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": [\"Glossary terms: Order Total\", \"INCIDENTS: PASS\"]}, {\"urn\": \"urn:li:dataJob:(urn:li:dataFlow:(spark,b2fd91.export_table_orders_to_s3,b2fd91.default),b2fd91.export_table_orders_to_s3)\", \"name\": \"export_table_orders_to_s3\", \"kind\": \"data-job\", \"owner\": \"Data Platform Team\", \"environment\": null, \"tags\": [], \"upstream\": [], \"downstream\": [], \"evidence\": [\"Domain: Data Platform Team\", \"Glossary terms: Order Total\", \"INCIDENTS: PASS\"]}]}",
+  "collected_at": "2026-08-03T06:26:07.120701Z"
+}

@@ -94,11 +94,21 @@ Create a concise plan with 3-6 ordered actions. Cite relevant URNs in findings a
         primary = context.resources[0] if context.resources else None
         target = primary.urn if primary else request.context_query
         findings = []
-        if primary:
+        if context.provider == "datahub-mcp":
             findings.append(
-                f"{primary.name} is owned by {primary.owner or 'an unrecorded owner'} and has "
-                f"{len(primary.downstream)} recorded downstream dependencies."
+                f"Live DataHub MCP context was collected with read-only tools: {context.tool}."
             )
+        if primary:
+            tags = ", ".join(primary.tags[:4]) or "no recorded tags"
+            findings.append(
+                f"{primary.name} ({primary.environment or 'environment unrecorded'}) is owned by "
+                f"{primary.owner or 'an unrecorded owner'}, tagged {tags}, and has "
+                f"{len(primary.upstream)} upstream and {len(primary.downstream)} downstream "
+                "dependencies."
+            )
+        if len(context.resources) > 1:
+            related = ", ".join(resource.name for resource in context.resources[1:6])
+            findings.append(f"Related governed resources returned by DataHub: {related}.")
         if context.provider.endswith("degraded"):
             findings.append("Live DataHub context is degraded; no mutation should be attempted.")
         return ActionPlan(

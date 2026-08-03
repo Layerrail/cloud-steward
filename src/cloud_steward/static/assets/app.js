@@ -85,7 +85,7 @@ $("#plan-form").addEventListener("submit", async (event) => {
       }),
     });
     renderPlan(plan);
-    await loadHistory();
+    await Promise.all([loadHistory(), loadStatus()]);
   } catch (requestError) {
     error.textContent = requestError.message;
   } finally {
