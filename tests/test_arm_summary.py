@@ -1,6 +1,16 @@
+import importlib.util
 import json
+from pathlib import Path
 
-from deploy.summarize_arm_inference import measurement, reduction, speedup
+MODULE_PATH = Path(__file__).resolve().parents[1] / "deploy" / "summarize_arm_inference.py"
+SPEC = importlib.util.spec_from_file_location("summarize_arm_inference", MODULE_PATH)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError("Could not load the Arm benchmark summarizer")
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+measurement = MODULE.measurement
+reduction = MODULE.reduction
+speedup = MODULE.speedup
 
 
 def test_arm_summary_parses_prompt_generation_and_rss(tmp_path) -> None:
