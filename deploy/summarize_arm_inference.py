@@ -171,6 +171,9 @@ def main() -> None:
                 ),
             },
             "kleidiai_vs_q4_0_cpu": {
+                "peak_rss_reduction_percent": reduction(
+                    optimized["peak_rss_kib"], q4["peak_rss_kib"]
+                ),
                 "prompt_speedup": speedup(
                     optimized["prompt_tokens_per_second"], q4["prompt_tokens_per_second"]
                 ),
@@ -208,6 +211,15 @@ def main() -> None:
             "The public Render demo remains x86_64 and does not use this local inference path.",
         ],
     }
+    kleidiai_comparison = evidence["comparisons"]["kleidiai_vs_q4_0_cpu"]
+    if (
+        kleidiai_comparison["prompt_speedup"] <= 1
+        and kleidiai_comparison["generation_speedup"] <= 1
+    ):
+        evidence["disclosures"].append(
+            "KleidiAI activation was verified but did not improve throughput over the regular "
+            "Q4_0 CPU backend in this run; quantization delivered the material optimization."
+        )
     if evidence["environment"]["architecture"] not in {"aarch64", "arm64"}:
         raise RuntimeError("Refusing to publish an Arm benchmark captured on another architecture")
 
@@ -238,10 +250,12 @@ def main() -> None:
         f"**{comparison['model_size_reduction_percent']:.2f}%** and peak RSS by "
         f"**{comparison['peak_rss_reduction_percent']:.2f}%** versus FP16. It delivered "
         f"**{comparison['prompt_speedup']:.3f}x** prompt throughput and "
-        f"**{comparison['generation_speedup']:.3f}x** generation throughput. KleidiAI "
-        f"contributed **{kleidiai['prompt_speedup']:.3f}x** prompt and "
-        f"**{kleidiai['generation_speedup']:.3f}x** generation throughput versus the "
-        "same Q4_0 model on the regular CPU backend."
+        f"**{comparison['generation_speedup']:.3f}x** generation throughput. The verified "
+        f"KleidiAI path measured **{kleidiai['prompt_speedup']:.3f}x** prompt throughput, "
+        f"**{kleidiai['generation_speedup']:.3f}x** generation throughput, and "
+        f"**{kleidiai['peak_rss_reduction_percent']:.2f}%** lower peak RSS versus the same "
+        "Q4_0 model on the regular CPU backend. Ratios below 1.000x indicate no measured "
+        "throughput gain on this runner."
     )
     quality_text = (
         "Both FP16 and optimized Q4_0 generated a Cloud Steward plan that passed the same "

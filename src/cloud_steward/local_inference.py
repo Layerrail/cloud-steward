@@ -129,7 +129,13 @@ class LlamaCppPlanner:
             if request.dry_run
             else "This is a proposal only; no infrastructure mutation has executed."
         )
-        if "no infrastructure mutation has executed" not in " ".join(assumptions).lower():
+        assumptions_text = " ".join(assumptions).lower()
+        needs_disclosure = (
+            "dry-run" not in assumptions_text
+            if request.dry_run
+            else "no infrastructure mutation has executed" not in assumptions_text
+        )
+        if needs_disclosure:
             assumptions.append(proposal_disclosure)
         return ActionPlan(
             goal=request.goal,

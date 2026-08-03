@@ -132,3 +132,28 @@ async def test_local_inference_plan_retains_guardrails(monkeypatch) -> None:
     assert plan.actions[-1].risk == RiskLevel.high
     assert plan.overall_risk == RiskLevel.high
     assert "no infrastructure mutation has executed" in " ".join(plan.assumptions).lower()
+
+
+@pytest.mark.asyncio
+async def test_local_inference_enforces_explicit_dry_run_disclosure(monkeypatch) -> None:
+    settings = Settings(
+        llama_cpp_binary="/opt/llama-completion",
+        llama_cpp_model_path="/models/qwen-q4.gguf",
+    )
+    request = PlanRequest(
+        goal="Protect checkout while preparing a capacity change",
+        context_query="checkout production",
+        dry_run=True,
+    )
+    context = DataHubContextProvider._sample(request.context_query)
+    draft = json.loads(local_plan_json())
+    draft["assumptions"] = ["No infrastructure mutation has executed."]
+
+    def fake_run(*_args, **_kwargs):
+        return SimpleNamespace(stdout=json.dumps(draft), stderr="", returncode=0)
+
+    monkeypatch.setattr("cloud_steward.local_inference.subprocess.run", fake_run)
+
+    plan = await PlanGenerator(settings).generate(request, context)
+
+    assert "dry-run" in " ".join(plan.assumptions).lower()
