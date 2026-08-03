@@ -83,6 +83,27 @@ def test_llama_cpp_command_is_cpu_only_and_schema_constrained() -> None:
     assert schema["properties"]["actions"]["minItems"] == 3
 
 
+def test_llama_cpp_missing_json_reports_bounded_runtime_diagnostics(monkeypatch) -> None:
+    settings = Settings(
+        llama_cpp_binary="/opt/llama-cli",
+        llama_cpp_model_path="/models/qwen-q4.gguf",
+    )
+    request = PlanRequest(
+        goal="Protect checkout while preparing a capacity change",
+        context_query="checkout production",
+    )
+    context = DataHubContextProvider._sample(request.context_query)
+    diagnostic = "runtime diagnostic: no tokens were generated"
+
+    def fake_run(*_args, **_kwargs):
+        return SimpleNamespace(stdout="", stderr=diagnostic, returncode=0)
+
+    monkeypatch.setattr("cloud_steward.local_inference.subprocess.run", fake_run)
+
+    with pytest.raises(RuntimeError, match=diagnostic):
+        LlamaCppPlanner(settings).generate(request, context)
+
+
 @pytest.mark.asyncio
 async def test_local_inference_plan_retains_guardrails(monkeypatch) -> None:
     settings = Settings(

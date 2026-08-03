@@ -105,7 +105,15 @@ class LlamaCppPlanner:
             timeout=self.settings.llama_cpp_timeout_seconds,
             env=environment,
         )
-        draft = LocalPlanDraft.model_validate(self._first_json_object(completed.stdout))
+        try:
+            payload = self._first_json_object(completed.stdout)
+        except ValueError as error:
+            diagnostic = self._diagnostic_excerpt(completed.stderr)
+            raise RuntimeError(
+                "llama.cpp did not return a complete JSON object; "
+                f"stdout_chars={len(completed.stdout)}; stderr_tail={diagnostic}"
+            ) from error
+        draft = LocalPlanDraft.model_validate(payload)
         actions = [
             ProposedAction(order=index, **action.model_dump())
             for index, action in enumerate(draft.actions, start=1)
@@ -220,6 +228,15 @@ class LlamaCppPlanner:
             if isinstance(value, dict):
                 return value
         raise ValueError("llama.cpp did not return a JSON object")
+
+    @staticmethod
+    def _diagnostic_excerpt(stderr: str, limit: int = 2000) -> str:
+        normalized = " ".join(stderr.split())
+        if not normalized:
+            return "<empty>"
+        if len(normalized) > limit:
+            return f"...{normalized[-limit:]}"
+        return normalized
 
     @staticmethod
     def _risk_order(level: RiskLevel) -> int:
