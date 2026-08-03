@@ -32,9 +32,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes build-essential cmake curl ninja-build time
           pip install -e .
-      - name: Run native Arm64 inference benchmark
+      - name: Build and measure native Arm64 inference
         env:
           ARM_BENCH_THREADS: "4"
+          ARM_BENCH_STAGE: measure
+        run: bash deploy/run_arm_inference_benchmark.sh
+      - name: Preserve raw native measurements
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-llama-kleidiai-raw
+          path: artifacts/arm-inference/raw
+          if-no-files-found: error
+          retention-days: 90
+      - name: Run Cloud Steward inference safety gates
+        env:
+          ARM_BENCH_THREADS: "4"
+          ARM_BENCH_STAGE: smoke
         run: bash deploy/run_arm_inference_benchmark.sh
       - name: Publish benchmark summary
         run: cat artifacts/arm-inference/benchmark-summary.md >> "$GITHUB_STEP_SUMMARY"

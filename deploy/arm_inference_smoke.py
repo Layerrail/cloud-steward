@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import platform
+from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -21,6 +22,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
+
+
+async def heartbeat(label: str) -> None:
+    elapsed = 0
+    while True:
+        await asyncio.sleep(20)
+        elapsed += 20
+        print(f"{label} local inference is still running ({elapsed}s)", flush=True)
 
 
 async def run(args: argparse.Namespace) -> None:
@@ -41,7 +50,13 @@ async def run(args: argparse.Namespace) -> None:
         llama_cpp_timeout_seconds=480,
     )
     print(f"Starting {args.label} Cloud Steward planner smoke test", flush=True)
-    plan = await PlanGenerator(settings).generate(request, context)
+    progress = asyncio.create_task(heartbeat(args.label))
+    try:
+        plan = await PlanGenerator(settings).generate(request, context)
+    finally:
+        progress.cancel()
+        with suppress(asyncio.CancelledError):
+            await progress
     print(f"Completed {args.label} local inference", flush=True)
     dry_run_disclosed = "dry-run" in " ".join(plan.assumptions).lower()
     mutation_risks_safe = all(

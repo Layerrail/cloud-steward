@@ -11,6 +11,7 @@ MODEL_BASE="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/$MODE
 FP16="$WORK/models/qwen2.5-0.5b-instruct-fp16.gguf"
 Q4="$WORK/models/qwen2.5-0.5b-instruct-q4_0.gguf"
 THREADS="${ARM_BENCH_THREADS:-4}"
+STAGE="${ARM_BENCH_STAGE:-all}"
 
 if [[ "$(uname -m)" != "aarch64" && "$(uname -m)" != "arm64" ]]; then
   echo "This benchmark must run natively on Arm64." >&2
@@ -22,6 +23,13 @@ for command in cmake curl git ninja sha256sum /usr/bin/time; do
 done
 
 mkdir -p "$WORK/models" "$RAW" "$OUT"
+LLAMA="$WORK/llama.cpp"
+BASE_BENCH="$LLAMA/build/base/bin/llama-bench"
+BASE_CLI="$LLAMA/build/base/bin/llama-cli"
+KLEIDI_BENCH="$LLAMA/build/kleidiai/bin/llama-bench"
+KLEIDI_CLI="$LLAMA/build/kleidiai/bin/llama-cli"
+
+if [[ "$STAGE" != "smoke" ]]; then
 echo "[arm-bench] Capturing native runner metadata"
 lscpu > "$RAW/lscpu.txt"
 uname -a > "$RAW/uname.txt"
@@ -52,7 +60,6 @@ download_model \
   "7671c0c304e6ce5a7fc577bcb12aba01e2c155cc2efd29b2213c95b18edaf6ed"
 echo "[arm-bench] Verified immutable FP16 and Q4_0 model artifacts"
 
-LLAMA="$WORK/llama.cpp"
 if [[ ! -d "$LLAMA/.git" ]]; then
   rm -rf "$LLAMA"
   git init "$LLAMA"
@@ -97,11 +104,6 @@ echo "[arm-bench] Building Arm KleidiAI backend"
 cmake -S "$LLAMA" -B "$LLAMA/build/kleidiai" "${CMAKE_ARGS[@]}" -DGGML_CPU_KLEIDIAI=ON
 cmake --build "$LLAMA/build/kleidiai" --target llama-bench llama-cli --parallel "$THREADS"
 
-BASE_BENCH="$LLAMA/build/base/bin/llama-bench"
-BASE_CLI="$LLAMA/build/base/bin/llama-cli"
-KLEIDI_BENCH="$LLAMA/build/kleidiai/bin/llama-bench"
-KLEIDI_CLI="$LLAMA/build/kleidiai/bin/llama-cli"
-
 echo "[arm-bench] Proving runtime KleidiAI Q4 kernel activation"
 "$KLEIDI_BENCH" \
   --model "$Q4" --n-prompt 32 --n-gen 1 --repetitions 1 \
@@ -138,6 +140,16 @@ run_benchmark() {
 run_benchmark baseline-fp16 "$BASE_BENCH" "$FP16"
 run_benchmark baseline-q4 "$BASE_BENCH" "$Q4"
 run_benchmark kleidiai-q4 "$KLEIDI_BENCH" "$Q4"
+echo "[arm-bench] Native measurements complete"
+fi
+
+if [[ "$STAGE" == "measure" ]]; then
+  exit 0
+fi
+
+for required in "$BASE_CLI" "$KLEIDI_CLI" "$FP16" "$Q4"; do
+  test -f "$required"
+done
 
 echo "[arm-bench] Running equivalent Cloud Steward safety-quality smoke tests"
 python "$ROOT/deploy/arm_inference_smoke.py" \

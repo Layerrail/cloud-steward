@@ -76,6 +76,9 @@ def test_llama_cpp_command_is_cpu_only_and_schema_constrained() -> None:
     assert command[command.index("--device") + 1] == "none"
     assert command[command.index("--n-gpu-layers") + 1] == "0"
     assert command[command.index("--threads") + 1] == "4"
+    assert "--conversation" in command
+    assert "--single-turn" in command
+    assert "--no-warmup" in command
     schema = json.loads(command[command.index("--json-schema") + 1])
     assert schema["properties"]["actions"]["minItems"] == 3
 
