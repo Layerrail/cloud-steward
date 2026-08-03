@@ -14,4 +14,6 @@
 - Live technical gate completed 2026-08-03: DataHub Core v1.5.0.6 plus the official `showcase-ecommerce` datapack returned eight governed resources through `search`, `get_entities`, and `get_lineage`.
 - Published evidence files: `docs/evidence/datahub-context.json` and its SHA-256 sidecar.
 - Presentation gate completed 2026-08-03: the 104-second live-DataHub walkthrough is public at https://youtu.be/xW0RnBrROeA.
+- Shared Devpost project updated 2026-08-03 with the new walkthrough and a detailed live-DataHub story linking the evidence directory; public read-back confirmed the changes.
+- Remaining draft fields: change the challenge category to Agents That Do Real Work and add the evidence-directory URL to the artifact-example field.
 - The walkthrough and evidence are local-integration proof; the public Render deployment remains in disclosed sample mode.
