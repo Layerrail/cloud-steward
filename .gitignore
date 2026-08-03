@@ -4,6 +4,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 .env
+.gemini-key.tmp
 var/
 dist/
 build/

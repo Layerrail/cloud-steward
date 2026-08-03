@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -34,3 +35,39 @@ jobs:
           platforms: linux/arm64
           push: false
           tags: cloud-steward:arm64-ci
+
+  gemini:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e .
+      - name: Verify Gemini structured planning
+        run: |
+          python - <<'PY'
+          import asyncio
+
+          from cloud_steward.datahub import DataHubContextProvider
+          from cloud_steward.models import PlanRequest, RiskLevel
+          from cloud_steward.planner import PlanGenerator
+          from cloud_steward.settings import Settings
+
+          request = PlanRequest(
+              goal="Protect invoice generation while diagnosing checkout latency",
+              context_query="checkout billing invoice production",
+          )
+          context = DataHubContextProvider._sample(request.context_query)
+          plan = asyncio.run(PlanGenerator(Settings()).generate(request, context))
+
+          assert plan.actions
+          assert plan.requires_approval is True
+          if any(action.mutation for action in plan.actions):
+              assert plan.overall_risk in {RiskLevel.high, RiskLevel.critical}
+          print({"actions": len(plan.actions), "risk": plan.overall_risk.value})
+          PY

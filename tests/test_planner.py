@@ -1,7 +1,7 @@
 import pytest
 
 from cloud_steward.datahub import DataHubContextProvider
-from cloud_steward.models import PlanRequest, RiskLevel
+from cloud_steward.models import ActionPlan, PlanRequest, ProposedAction, RiskLevel
 from cloud_steward.planner import PlanGenerator
 from cloud_steward.settings import Settings
 
@@ -34,3 +34,31 @@ async def test_sample_context_is_explicitly_disclosed() -> None:
     assert context.provider == "sample-datahub-context"
     assert "Demo context" in context.raw_excerpt
     assert context.resources
+
+
+def test_guardrails_raise_mutating_plan_risk() -> None:
+    plan = ActionPlan(
+        goal="Scale a service",
+        summary="Proposed scaling plan",
+        actions=[
+            ProposedAction(
+                order=1,
+                action="Scale service",
+                target="production-api",
+                reason="Reduce saturation",
+                expected_result="Lower queue depth",
+                verification="Compare queue depth and errors",
+                rollback="Restore prior replica count",
+                risk=RiskLevel.low,
+                mutation=True,
+            )
+        ],
+        overall_risk=RiskLevel.low,
+        requires_approval=False,
+    )
+
+    guarded = PlanGenerator.enforce_guardrails(plan)
+
+    assert guarded.requires_approval is True
+    assert guarded.actions[0].risk == RiskLevel.high
+    assert guarded.overall_risk == RiskLevel.high

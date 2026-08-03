@@ -5,6 +5,7 @@ from cloud_steward.models import (
     ActionPlan,
     ContextSnapshot,
     PlanRequest,
+    PlanStatus,
     ProposedAction,
     RiskLevel,
 )
@@ -40,11 +41,22 @@ class PlanGenerator:
         )
         plan = ActionPlan.model_validate_json(interaction.output_text)
         plan.goal = request.goal
-        plan.status = "proposed"
+        return self.enforce_guardrails(plan)
+
+    @classmethod
+    def enforce_guardrails(cls, plan: ActionPlan) -> ActionPlan:
+        plan.status = PlanStatus.proposed
         plan.requires_approval = True
         for action in plan.actions:
             if action.mutation:
-                action.risk = max(action.risk, RiskLevel.high, key=self._risk_order)
+                action.risk = max(action.risk, RiskLevel.high, key=cls._risk_order)
+        action_risks = [action.risk for action in plan.actions]
+        if action_risks:
+            plan.overall_risk = max(
+                plan.overall_risk,
+                *action_risks,
+                key=cls._risk_order,
+            )
         return plan
 
     @staticmethod
