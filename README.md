@@ -60,7 +60,7 @@ local proof does not imply the public Render service is configured with DataHub.
 ```mermaid
 graph LR
     A[Operational goal] --> B[DataHub governed context]
-    B --> C[Gemini structured plan]
+  B --> C[Structured planner: Gemini or local Arm llama.cpp]
     C --> D{Named approval}
     D -->|Reject| E[Expire proposal]
     D -->|Approve| F[Approval receipt]
