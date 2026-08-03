@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import math
 from datetime import UTC, datetime
@@ -67,7 +69,7 @@ class PlanStore:
         if self.vector_index_enabled:
             self._save_vector(str(plan.id), plan.goal)
 
-    def list(self, limit: int = 50) -> list[dict[str, Any]]:
+    def list_records(self, limit: int = 50) -> list[dict[str, Any]]:
         with Session(self.engine) as session:
             records = session.scalars(
                 select(PlanRecord).order_by(PlanRecord.created_at.desc()).limit(limit)
@@ -123,7 +125,7 @@ class PlanStore:
                     for row in rows
                 ]
 
-        records = self.list(limit=100)
+        records = self.list_records(limit=100)
         scored = []
         for record in records:
             similarity = self._cosine(embedding, self._embedding(record["goal"]))

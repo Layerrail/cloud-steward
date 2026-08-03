@@ -23,7 +23,7 @@ class StewardService:
         return plan
 
     def list_plans(self) -> list[dict]:
-        return self.store.list()
+        return self.store.list_records()
 
     def approve(self, plan_id: str, approval: ApprovalRequest) -> dict | None:
         """Records approval only. Execution is intentionally a separate, unimplemented boundary."""
