@@ -1,7 +1,7 @@
 # Arm submission checklist
 
 - Devpost submission ID: `1123362`.
-- Draft state: 4/5 steps complete; not finally submitted.
+- Status: Submitted 2026-08-03T12:42:53.089-04:00, confirmed via `get_project` (`hackathons[].submitted_at`).
 - Intended track: Track 2 — Cloud AI.
 - Track fit: native CPU-only inference on a cloud-hosted Arm64 runner, Q4_0 quantization, `llama.cpp`, verified KleidiAI activation, and an agentic planning workload.
 - Deadline: 2026-08-14 16:00 PT.
@@ -16,4 +16,4 @@
 - Verified FP16 comparison: 66.46% smaller model, 54.39% lower peak RSS, 2.237x prompt throughput, and 1.922x generation throughput for Q4_0 plus KleidiAI.
 - Transparent backend comparison: verified KleidiAI measured 0.998x prompt and 0.993x generation throughput versus regular Q4_0, so quantization—not an extra KleidiAI speedup—is the material optimization claimed.
 - Publication gate completed 2026-08-03: the public Devpost story includes the measured Cloud AI section, evidence URL, exact results, and no-speedup disclosure.
-- The final Official Rules agreement remains unchecked.
+- The Official Rules agreement was accepted by the project author and the final submission was authorized and executed 2026-08-03.
