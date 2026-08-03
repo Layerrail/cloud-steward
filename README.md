@@ -26,6 +26,7 @@ Cloud Steward makes those questions part of the action path.
 
 - Collect governed metadata through the open-source **DataHub MCP Server**.
 - Generate schema-constrained plans with **Gemini**.
+- Run schema-constrained local planning through CPU-only **llama.cpp**, including an Arm KleidiAI path.
 - Persist context, plans, and named approvals in **CockroachDB** or local SQLite.
 - Recall related decisions through a CockroachDB `VECTOR(8)` cosine index, with a disclosed deterministic local fallback.
 - Explain the target, reason, expected outcome, verification, rollback, and risk of every action.
@@ -125,6 +126,12 @@ The DataHub quickstart uses development credentials and host-bound backend ports
 Set `GEMINI_API_KEY`. Cloud Steward uses the official `google-genai` SDK and requests structured output matching the `ActionPlan` schema. Model output remains a proposal and is never treated as authority to execute.
 
 On Google Cloud Run, set `GOOGLE_GENAI_USE_VERTEXAI=true`, `GOOGLE_CLOUD_PROJECT`, and `GOOGLE_CLOUD_LOCATION`. The official SDK then uses the Cloud Run service account through Application Default Credentials, so no Gemini API key is stored in the container.
+
+## Run local inference on Arm64
+
+Set `LLAMA_CPP_BINARY` to a CPU-only `llama-cli` executable and `LLAMA_CPP_MODEL_PATH` to a compatible local GGUF instruction model. Local planning then takes precedence over Gemini, uses a strict JSON schema and deterministic sampling, and is validated through the same approval-first guardrails. No model or `llama.cpp` binary is bundled in this repository.
+
+The dedicated native Arm64 workflow compares Qwen2.5-0.5B-Instruct FP16, Q4_0, and Q4_0 with Arm KleidiAI. It records prompt and generation throughput, peak RSS, model size, activation evidence, exact upstream revisions, checksums, and safety-quality parity. See [`docs/arm-inference.md`](docs/arm-inference.md) for the controlled method and reproduction steps.
 
 ## API
 

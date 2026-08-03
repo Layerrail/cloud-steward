@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     google_cloud_project: str | None = None
     google_cloud_location: str = "global"
     google_genai_use_vertexai: bool = False
+    llama_cpp_binary: str | None = None
+    llama_cpp_model_path: str | None = None
+    llama_cpp_model_name: str = "Qwen2.5-0.5B-Instruct Q4_0"
+    llama_cpp_threads: int = Field(default=4, ge=1, le=128)
+    llama_cpp_context_size: int = Field(default=4096, ge=512, le=32768)
+    llama_cpp_max_tokens: int = Field(default=768, ge=128, le=4096)
+    llama_cpp_timeout_seconds: int = Field(default=300, ge=10, le=1800)
     datahub_mcp_url: str | None = None
     datahub_gms_url: str | None = None
     datahub_gms_token: str | None = Field(default=None, repr=False)
@@ -36,6 +43,10 @@ class Settings(BaseSettings):
             self.gemini_api_key
             or (self.google_genai_use_vertexai and self.google_cloud_project)
         )
+
+    @property
+    def llama_cpp_enabled(self) -> bool:
+        return bool(self.llama_cpp_binary and self.llama_cpp_model_path)
 
     @property
     def datahub_enabled(self) -> bool:

@@ -1,6 +1,7 @@
 import json
 from asyncio import to_thread
 
+from cloud_steward.local_inference import LlamaCppPlanner
 from cloud_steward.models import (
     ActionPlan,
     ContextSnapshot,
@@ -17,6 +18,9 @@ class PlanGenerator:
         self.settings = settings
 
     async def generate(self, request: PlanRequest, context: ContextSnapshot) -> ActionPlan:
+        if self.settings.llama_cpp_enabled:
+            plan = await to_thread(LlamaCppPlanner(self.settings).generate, request, context)
+            return self.enforce_guardrails(plan)
         if not self.settings.gemini_enabled:
             return self._deterministic_plan(request, context)
         return await to_thread(self._generate_with_gemini, request, context)

@@ -72,6 +72,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     detail=f"Structured action planning with {settings.gemini_model}",
                 ),
                 IntegrationStatus(
+                    name="Arm local inference",
+                    configured=settings.llama_cpp_enabled,
+                    mode="llama.cpp" if settings.llama_cpp_enabled else "disabled",
+                    detail=(
+                        f"CPU-only structured planning with {settings.llama_cpp_model_name}"
+                    ),
+                ),
+                IntegrationStatus(
                     name="CockroachDB vector memory",
                     configured=store.vector_index_enabled,
                     mode=(
