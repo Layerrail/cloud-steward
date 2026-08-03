@@ -9,7 +9,7 @@ The dedicated `Native Arm inference` workflow runs on GitHub's native `ubuntu-24
 The workflow pins and checksum-verifies:
 
 - `llama.cpp` commit `1464c62d88f699ec9700c8010bbfdbc603a9efd6`;
-- official `Qwen/Qwen2.5-0.5B-Instruct-GGUF` revision `9217f5db79a29953eb74d5343926648285ec7e67`;
+- official [`Qwen/Qwen2.5-0.5B-Instruct-GGUF`](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF) revision `9217f5db79a29953eb74d5343926648285ec7e67`;
 - FP16 SHA-256 `8e0ae26000627ed62de0e78e41860af70094558b9d2913385c842a6aa06cf3fc`; and
 - Q4_0 SHA-256 `7671c0c304e6ce5a7fc577bcb12aba01e2c155cc2efd29b2213c95b18edaf6ed`.
 
@@ -24,7 +24,21 @@ Three configurations are measured with 4 threads, five repetitions, a 512-token 
 - Q4_0 on the regular CPU backend; and
 - Q4_0 on the Arm KleidiAI backend.
 
-The workflow refuses to label a result as KleidiAI unless runtime logs contain both the selected primary Q4 kernel feature and a `CPU_KLEIDIAI` model buffer. It also runs the real Cloud Steward planner with FP16 and optimized Q4_0. Both outputs must pass identical structural safety gates; this checks guardrail parity, not identical prose or mathematical equivalence between precisions.
+The workflow refuses to label a result as KleidiAI unless an actual inference run reports both the selected primary Q4 kernel feature and a `CPU_KLEIDIAI` model buffer. It also runs the real Cloud Steward planner with FP16 and optimized Q4_0. Both outputs must pass identical structural safety gates; this checks guardrail parity, not identical prose or mathematical equivalence between precisions. Peak RSS is the maximum resident set of the whole benchmark process, including model weights and working memory; it is not a kernel-only allocation measurement.
+
+## Verified result
+
+[Run 30822464850](https://github.com/Layerrail/cloud-steward/actions/runs/30822464850) completed successfully on 2026-08-03 on a native four-vCPU Arm Neoverse-N2 runner.
+
+| Configuration | Prompt tok/s | Generation tok/s | Peak RSS MiB |
+| --- | ---: | ---: | ---: |
+| FP16 CPU baseline | 160.210 | 62.575 | 1307.8 |
+| Q4_0 CPU baseline | 359.043 | 121.107 | 602.2 |
+| Q4_0 + KleidiAI | 358.337 | 120.241 | 596.4 |
+
+The Q4_0 plus KleidiAI path reduced model size by 66.46% and peak RSS by 54.39% versus FP16, with 2.237x prompt and 1.922x generation throughput. Runtime logs verified the I8MM KleidiAI Q4 kernel and `CPU_KLEIDIAI` model buffer. Against the same Q4_0 model on the regular CPU backend, however, KleidiAI measured 0.998x prompt and 0.993x generation throughput. This run therefore attributes the material optimization to quantization and does not claim an additional KleidiAI speedup.
+
+See the [normalized evidence, artifact digests, and disclosures](evidence/arm-inference-benchmark.md) and its machine-readable JSON plus SHA-256 sidecar.
 
 Run it from the Actions tab or on a native Arm64 Ubuntu host after installing Python 3.12+, CMake, Ninja, a C/C++ toolchain, curl, Git, and GNU time:
 

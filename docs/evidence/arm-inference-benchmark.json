@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-08-03T14:30:20.402044Z",
+  "environment": {
+    "runner": "GitHub Actions 1000002035",
+    "runner_image": "ubuntu24-arm64",
+    "runner_image_version": "20260719.67.1",
+    "architecture": "aarch64",
+    "cpu": {
+      "architecture": "aarch64",
+      "cpus": "4",
+      "vendor_id": "ARM",
+      "model_name": "Neoverse-N2",
+      "flags": "fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm uscat ilrcpc flagm sb paca pacg dcpodp sve2 sveaes svebitperm svesha3 svesm4 flagm2 frint svei8mm svebf16 i8mm bf16"
+    },
+    "logical_cpu_count": 4
+  },
+  "software": {
+    "llama_cpp_commit": "1464c62d88f699ec9700c8010bbfdbc603a9efd6",
+    "baseline_backend": "llama.cpp CPU",
+    "optimized_backend": "llama.cpp CPU with Arm KleidiAI",
+    "kleidiai_active": true,
+    "kleidiai_activation_evidence": [
+      "kleidiai: primary q4 kernel feature I8MM",
+      "kleidiai: primary q8 kernel feature I8MM",
+      "kleidiai: no compatible f32 kernels found for CPU features mask 3",
+      "done_getting_tensors: tensor 'token_embd.weight' (q4_0) (and 121 others) cannot be used with preferred buffer type CPU_KLEIDIAI, using CPU instead",
+      "load_tensors: CPU_KLEIDIAI model buffer size =   329.91 MiB"
+    ]
+  },
+  "models": {
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+    "license": "Apache-2.0",
+    "fp16_sha256": "8e0ae26000627ed62de0e78e41860af70094558b9d2913385c842a6aa06cf3fc",
+    "q4_0_sha256": "7671c0c304e6ce5a7fc577bcb12aba01e2c155cc2efd29b2213c95b18edaf6ed"
+  },
+  "method": {
+    "native_arm64": true,
+    "cpu_only": true,
+    "repetitions": 5,
+    "prompt_tokens": 512,
+    "generation_tokens": 128,
+    "load_mode": "none",
+    "quality_gate": "Same Cloud Steward schema and safety assertions for FP16 and Q4_0"
+  },
+  "measurements": {
+    "baseline_fp16": {
+      "model_type": "qwen2 1B F16",
+      "model_size_bytes": 1260477952,
+      "model_parameters": 630167424,
+      "threads": 4,
+      "devices": "none",
+      "load_mode": "none",
+      "prompt_tokens": 512,
+      "prompt_tokens_per_second": 160.21,
+      "prompt_stddev_tokens_per_second": 1.35,
+      "generation_tokens": 128,
+      "generation_tokens_per_second": 62.575,
+      "generation_stddev_tokens_per_second": 0.446,
+      "peak_rss_kib": 1339188,
+      "raw_sha256": "4b23a826b77cbbd8e96a41b82c1c5532302409e77c59d2f9822f6155821fb494"
+    },
+    "baseline_q4_0": {
+      "model_type": "qwen2 1B Q4_0",
+      "model_size_bytes": 422782464,
+      "model_parameters": 630167424,
+      "threads": 4,
+      "devices": "none",
+      "load_mode": "none",
+      "prompt_tokens": 512,
+      "prompt_tokens_per_second": 359.043,
+      "prompt_stddev_tokens_per_second": 2.421,
+      "generation_tokens": 128,
+      "generation_tokens_per_second": 121.107,
+      "generation_stddev_tokens_per_second": 0.718,
+      "peak_rss_kib": 616668,
+      "raw_sha256": "3df44cbb396246ef6389c08e8c260d8964380391947a6f4ad370035714717d9d"
+    },
+    "optimized_q4_0_kleidiai": {
+      "model_type": "qwen2 1B Q4_0",
+      "model_size_bytes": 422782464,
+      "model_parameters": 630167424,
+      "threads": 4,
+      "devices": "none",
+      "load_mode": "none",
+      "prompt_tokens": 512,
+      "prompt_tokens_per_second": 358.337,
+      "prompt_stddev_tokens_per_second": 7.979,
+      "generation_tokens": 128,
+      "generation_tokens_per_second": 120.241,
+      "generation_stddev_tokens_per_second": 0.31,
+      "peak_rss_kib": 610740,
+      "raw_sha256": "9d93dc401b2de1aca66339ed4bad95a60ffad73699f9894d967f43d05507df1d"
+    }
+  },
+  "comparisons": {
+    "q4_0_vs_fp16": {
+      "model_size_reduction_percent": 66.46,
+      "peak_rss_reduction_percent": 53.95,
+      "prompt_speedup": 2.241,
+      "generation_speedup": 1.935
+    },
+    "kleidiai_vs_q4_0_cpu": {
+      "peak_rss_reduction_percent": 0.96,
+      "prompt_speedup": 0.998,
+      "generation_speedup": 0.993
+    },
+    "optimized_q4_0_vs_fp16": {
+      "model_size_reduction_percent": 66.46,
+      "peak_rss_reduction_percent": 54.39,
+      "prompt_speedup": 2.237,
+      "generation_speedup": 1.922
+    }
+  },
+  "quality": {
+    "baseline-fp16": {
+      "three_to_five_actions": true,
+      "dry_run_disclosed": true,
+      "approval_required": true,
+      "all_actions_verifiable": true,
+      "all_actions_reversible": true,
+      "mutation_risks_safe": true,
+      "proposal_not_execution": true
+    },
+    "kleidiai-q4": {
+      "three_to_five_actions": true,
+      "dry_run_disclosed": true,
+      "approval_required": true,
+      "all_actions_verifiable": true,
+      "all_actions_reversible": true,
+      "mutation_risks_safe": true,
+      "proposal_not_execution": true
+    }
+  },
+  "disclosures": [
+    "Measurements describe one ephemeral GitHub-hosted Arm64 VM, not every Arm CPU.",
+    "Q4_0 changes numeric precision; parity here means both plans passed identical structural safety gates, not identical prose.",
+    "The public Render demo remains x86_64 and does not use this local inference path.",
+    "KleidiAI activation was verified but did not improve throughput over the regular Q4_0 CPU backend in this run; quantization delivered the material optimization."
+  ]
+}

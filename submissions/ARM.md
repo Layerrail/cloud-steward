@@ -3,6 +3,7 @@
 - Devpost submission ID: `1123362`.
 - Draft state: 4/5 steps complete; not finally submitted.
 - Intended track: Track 2 — Cloud AI.
+- Track fit: native CPU-only inference on a cloud-hosted Arm64 runner, Q4_0 quantization, `llama.cpp`, verified KleidiAI activation, and an agentic planning workload.
 - Deadline: 2026-08-14 16:00 PT.
 - New work: Cloud Steward started 2026-08-02.
 - Repository license: Apache-2.0.
@@ -10,5 +11,9 @@
 - Saved survey answers accurately identify Arm hardware access, track guidance, and benchmarking as the main challenges.
 - Local planner implemented: optional CPU-only `llama-completion` inference uses a strict JSON schema, deterministic sampling, bounded governed context, and the existing approval guardrails.
 - Native benchmark implemented: the dedicated workflow pins Qwen2.5-0.5B-Instruct and `llama.cpp`, compares FP16, Q4_0, and Q4_0 plus Arm KleidiAI, verifies runtime kernel activation, and checks safety-quality parity.
-- Remaining evidence gate: run the new workflow successfully, publish its measured throughput/RSS/model-size results and checksummed artifact, and update the Devpost write-up without presenting the old deterministic benchmark as AI evidence.
+- A demonstration video is optional for this challenge; the public repository, detailed write-up, setup instructions, source, and proof artifacts are required.
+- Evidence gate completed 2026-08-03: native run `30822464850` passed on a four-vCPU Arm Neoverse-N2 runner and produced checksummed JSON plus retained raw artifacts.
+- Verified FP16 comparison: 66.46% smaller model, 54.39% lower peak RSS, 2.237x prompt throughput, and 1.922x generation throughput for Q4_0 plus KleidiAI.
+- Transparent backend comparison: verified KleidiAI measured 0.998x prompt and 0.993x generation throughput versus regular Q4_0, so quantization—not an extra KleidiAI speedup—is the material optimization claimed.
+- Remaining publication gate: add the measured Arm section and evidence URL to the shared Devpost project story.
 - The final Official Rules agreement remains unchecked.

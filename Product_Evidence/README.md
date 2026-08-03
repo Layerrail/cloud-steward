@@ -10,6 +10,7 @@ Cloud Steward began on 2026-08-02. This folder separates verified evidence from 
 - Original public sample-mode walkthrough: https://youtu.be/tI2ZgGVbZcA
 - Public CI: https://github.com/Layerrail/cloud-steward/actions/runs/30781828308
 - The CI run passed Python 3.12 and 3.13 tests, a native `aarch64` container build and benchmark, a secure CockroachDB vector-memory integration, and one live Gemini schema-constrained planning call.
+- Native Arm inference run https://github.com/Layerrail/cloud-steward/actions/runs/30822464850 passed on a four-vCPU Neoverse-N2 runner. Checksummed evidence records Qwen2.5-0.5B-Instruct FP16, Q4_0, and verified KleidiAI measurements plus structural safety parity.
 - A separate local run captured governed DataHub Core ownership, glossary, structured properties, health, and one-hop lineage through the read-only open-source MCP server. The public demo remains in sample mode.
 - The public demo's `/api/status` response truthfully reports sample DataHub context, deterministic planning, and local memory.
 

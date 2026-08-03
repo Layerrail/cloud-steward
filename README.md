@@ -55,6 +55,16 @@ its SHA-256 sidecar and the
 [104-second live integration walkthrough](https://youtu.be/xW0RnBrROeA). This
 local proof does not imply the public Render service is configured with DataHub.
 
+[Native Arm inference run 30822464850](https://github.com/Layerrail/cloud-steward/actions/runs/30822464850)
+also passed on 2026-08-03 on a four-vCPU Arm Neoverse-N2 runner. Against the
+FP16 baseline, Qwen2.5-0.5B-Instruct Q4_0 with the verified KleidiAI backend
+reduced model size by 66.46% and peak RSS by 54.39%, while measuring 2.237x
+prompt and 1.922x generation throughput. Both generated plans passed identical
+structural safety gates. KleidiAI itself measured 0.998x prompt and 0.993x
+generation throughput against regular Q4_0, so no extra throughput gain is
+claimed; quantization delivered the material improvement. See the
+[checksummed evidence](docs/evidence/arm-inference-benchmark.md).
+
 ## Safety model
 
 ```mermaid
