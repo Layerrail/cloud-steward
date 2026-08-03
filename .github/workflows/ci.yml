@@ -28,6 +28,17 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e .
+      - name: Capture Arm64 benchmark
+        run: python deploy/benchmark.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arm64-benchmark
+          path: artifacts/benchmark.json
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:

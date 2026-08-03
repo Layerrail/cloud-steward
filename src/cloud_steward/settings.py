@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./var/cloud-steward.db"
     gemini_api_key: str | None = Field(default=None, repr=False)
     gemini_model: str = "gemini-3.6-flash"
+    google_cloud_project: str | None = None
+    google_cloud_location: str = "global"
+    google_genai_use_vertexai: bool = False
     datahub_mcp_url: str | None = None
     datahub_gms_url: str | None = None
     datahub_gms_token: str | None = Field(default=None, repr=False)
@@ -29,7 +32,10 @@ class Settings(BaseSettings):
 
     @property
     def gemini_enabled(self) -> bool:
-        return bool(self.gemini_api_key)
+        return bool(
+            self.gemini_api_key
+            or (self.google_genai_use_vertexai and self.google_cloud_project)
+        )
 
     @property
     def datahub_enabled(self) -> bool:

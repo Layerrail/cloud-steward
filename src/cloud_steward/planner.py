@@ -28,7 +28,14 @@ class PlanGenerator:
     ) -> ActionPlan:
         from google import genai
 
-        client = genai.Client(api_key=self.settings.gemini_api_key)
+        if self.settings.google_genai_use_vertexai:
+            client = genai.Client(
+                vertexai=True,
+                project=self.settings.google_cloud_project,
+                location=self.settings.google_cloud_location,
+            )
+        else:
+            client = genai.Client(api_key=self.settings.gemini_api_key)
         prompt = self._prompt(request, context)
         interaction = client.interactions.create(
             model=self.settings.gemini_model,

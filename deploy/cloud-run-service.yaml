@@ -21,6 +21,12 @@ spec:
               value: "true"
             - name: ALLOW_MUTATIONS
               value: "false"
+            - name: GOOGLE_GENAI_USE_VERTEXAI
+              value: "true"
+            - name: GOOGLE_CLOUD_PROJECT
+              value: generated-mote-414423
+            - name: GOOGLE_CLOUD_LOCATION
+              value: global
           resources:
             limits:
               cpu: "1"
