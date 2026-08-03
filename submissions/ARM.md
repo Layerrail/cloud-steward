@@ -15,5 +15,5 @@
 - Evidence gate completed 2026-08-03: native run `30822464850` passed on a four-vCPU Arm Neoverse-N2 runner and produced checksummed JSON plus retained raw artifacts.
 - Verified FP16 comparison: 66.46% smaller model, 54.39% lower peak RSS, 2.237x prompt throughput, and 1.922x generation throughput for Q4_0 plus KleidiAI.
 - Transparent backend comparison: verified KleidiAI measured 0.998x prompt and 0.993x generation throughput versus regular Q4_0, so quantization—not an extra KleidiAI speedup—is the material optimization claimed.
-- Remaining publication gate: add the measured Arm section and evidence URL to the shared Devpost project story.
+- Publication gate completed 2026-08-03: the public Devpost story includes the measured Cloud AI section, evidence URL, exact results, and no-speedup disclosure.
 - The final Official Rules agreement remains unchecked.
