@@ -18,6 +18,7 @@ dependencies = [
   "psycopg[binary]>=3.2,<4",
   "pydantic-settings>=2.10,<3",
   "sqlalchemy>=2.0,<3",
+  "sqlalchemy-cockroachdb>=2.0.4,<3",
   "uvicorn[standard]>=0.35,<1",
 ]
 
