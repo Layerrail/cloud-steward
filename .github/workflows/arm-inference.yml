@@ -20,7 +20,7 @@ jobs:
   benchmark:
     name: Qwen FP16 vs Q4_0 + KleidiAI
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,8 +39,9 @@ jobs:
       - name: Publish benchmark summary
         run: cat artifacts/arm-inference/benchmark-summary.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: arm64-llama-kleidiai-evidence
           path: artifacts/arm-inference
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90

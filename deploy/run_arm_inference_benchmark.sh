@@ -22,6 +22,7 @@ for command in cmake curl git ninja sha256sum /usr/bin/time; do
 done
 
 mkdir -p "$WORK/models" "$RAW" "$OUT"
+echo "[arm-bench] Capturing native runner metadata"
 lscpu > "$RAW/lscpu.txt"
 uname -a > "$RAW/uname.txt"
 {
@@ -49,6 +50,7 @@ download_model \
   "qwen2.5-0.5b-instruct-q4_0.gguf" \
   "$Q4" \
   "7671c0c304e6ce5a7fc577bcb12aba01e2c155cc2efd29b2213c95b18edaf6ed"
+echo "[arm-bench] Verified immutable FP16 and Q4_0 model artifacts"
 
 LLAMA="$WORK/llama.cpp"
 if [[ ! -d "$LLAMA/.git" ]]; then
@@ -59,6 +61,7 @@ fi
 git -C "$LLAMA" fetch --depth 1 origin "$LLAMA_COMMIT"
 git -C "$LLAMA" checkout --detach FETCH_HEAD
 test "$(git -C "$LLAMA" rev-parse HEAD)" = "$LLAMA_COMMIT"
+echo "[arm-bench] Checked out llama.cpp $LLAMA_COMMIT"
 
 CMAKE_ARGS=(
   -G Ninja
@@ -87,8 +90,10 @@ CMAKE_ARGS=(
   -DLLAMA_BUILD_APP=OFF
 )
 
+echo "[arm-bench] Building regular CPU baseline"
 cmake -S "$LLAMA" -B "$LLAMA/build/base" "${CMAKE_ARGS[@]}" -DGGML_CPU_KLEIDIAI=OFF
 cmake --build "$LLAMA/build/base" --target llama-bench llama-cli --parallel "$THREADS"
+echo "[arm-bench] Building Arm KleidiAI backend"
 cmake -S "$LLAMA" -B "$LLAMA/build/kleidiai" "${CMAKE_ARGS[@]}" -DGGML_CPU_KLEIDIAI=ON
 cmake --build "$LLAMA/build/kleidiai" --target llama-bench llama-cli --parallel "$THREADS"
 
@@ -97,17 +102,20 @@ BASE_CLI="$LLAMA/build/base/bin/llama-cli"
 KLEIDI_BENCH="$LLAMA/build/kleidiai/bin/llama-bench"
 KLEIDI_CLI="$LLAMA/build/kleidiai/bin/llama-cli"
 
+echo "[arm-bench] Proving runtime KleidiAI Q4 kernel activation"
 "$KLEIDI_BENCH" \
   --model "$Q4" --n-prompt 32 --n-gen 1 --repetitions 1 \
   --threads "$THREADS" --device none --n-gpu-layers 0 --output jsonl --verbose \
-  > /dev/null 2> "$RAW/kleidiai-activation.log"
+  > /dev/null 2> >(tee "$RAW/kleidiai-activation.log" >&2)
 grep -Eiq 'kleidiai: primary q4 kernel feature' "$RAW/kleidiai-activation.log"
 grep -Eiq 'CPU_KLEIDIAI model buffer size' "$RAW/kleidiai-activation.log"
+echo "[arm-bench] KleidiAI Q4 activation verified"
 
 run_benchmark() {
   local label="$1"
   local binary="$2"
   local model="$3"
+  echo "[arm-bench] Measuring $label"
   /usr/bin/time \
     --format='max_rss_kib=%M elapsed_s=%e exit=%x' \
     --output="$RAW/$label.rss" \
@@ -121,14 +129,17 @@ run_benchmark() {
       --device none \
       --n-gpu-layers 0 \
       --load-mode none \
+      --progress \
       > "$RAW/$label.jsonl" \
-      2> "$RAW/$label.stderr"
+      2> >(tee "$RAW/$label.stderr" >&2)
+  echo "[arm-bench] Completed $label"
 }
 
 run_benchmark baseline-fp16 "$BASE_BENCH" "$FP16"
 run_benchmark baseline-q4 "$BASE_BENCH" "$Q4"
 run_benchmark kleidiai-q4 "$KLEIDI_BENCH" "$Q4"
 
+echo "[arm-bench] Running equivalent Cloud Steward safety-quality smoke tests"
 python "$ROOT/deploy/arm_inference_smoke.py" \
   --binary "$BASE_CLI" --model "$FP16" --label baseline-fp16 \
   --threads "$THREADS" --output "$RAW/smoke-baseline-fp16.json"
@@ -136,7 +147,9 @@ python "$ROOT/deploy/arm_inference_smoke.py" \
   --binary "$KLEIDI_CLI" --model "$Q4" --label kleidiai-q4 \
   --threads "$THREADS" --output "$RAW/smoke-kleidiai-q4.json"
 
+echo "[arm-bench] Normalizing measurements and checksums"
 python "$ROOT/deploy/summarize_arm_inference.py" \
   --raw-dir "$RAW" \
   --output "$OUT/benchmark-summary.json" \
   --markdown "$OUT/benchmark-summary.md"
+echo "[arm-bench] Native Arm64 inference evidence complete"

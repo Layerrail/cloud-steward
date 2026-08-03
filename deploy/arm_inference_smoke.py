@@ -36,11 +36,13 @@ async def run(args: argparse.Namespace) -> None:
         llama_cpp_model_path=str(args.model.resolve(strict=True)),
         llama_cpp_model_name=args.label,
         llama_cpp_threads=args.threads,
-        llama_cpp_context_size=4096,
-        llama_cpp_max_tokens=768,
-        llama_cpp_timeout_seconds=600,
+        llama_cpp_context_size=3072,
+        llama_cpp_max_tokens=512,
+        llama_cpp_timeout_seconds=480,
     )
+    print(f"Starting {args.label} Cloud Steward planner smoke test", flush=True)
     plan = await PlanGenerator(settings).generate(request, context)
+    print(f"Completed {args.label} local inference", flush=True)
     dry_run_disclosed = "dry-run" in " ".join(plan.assumptions).lower()
     mutation_risks_safe = all(
         not action.mutation or action.risk in {RiskLevel.high, RiskLevel.critical}
