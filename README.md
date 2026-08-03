@@ -129,7 +129,7 @@ On Google Cloud Run, set `GOOGLE_GENAI_USE_VERTEXAI=true`, `GOOGLE_CLOUD_PROJECT
 
 ## Run local inference on Arm64
 
-Set `LLAMA_CPP_BINARY` to a CPU-only `llama-cli` executable and `LLAMA_CPP_MODEL_PATH` to a compatible local GGUF instruction model. Local planning then takes precedence over Gemini, uses a strict JSON schema and deterministic sampling, and is validated through the same approval-first guardrails. No model or `llama.cpp` binary is bundled in this repository.
+Set `LLAMA_CPP_BINARY` to a CPU-only `llama-completion` executable and `LLAMA_CPP_MODEL_PATH` to a compatible local GGUF instruction model. Local planning then takes precedence over Gemini, uses a strict JSON schema and deterministic sampling, and is validated through the same approval-first guardrails. The one-shot completion path explicitly disables conversation mode so chat role markers are not prefilled into the JSON grammar. No model or `llama.cpp` binary is bundled in this repository.
 
 The dedicated native Arm64 workflow compares Qwen2.5-0.5B-Instruct FP16, Q4_0, and Q4_0 with Arm KleidiAI. It records prompt and generation throughput, peak RSS, model size, activation evidence, exact upstream revisions, checksums, and safety-quality parity. See [`docs/arm-inference.md`](docs/arm-inference.md) for the controlled method and reproduction steps.
 

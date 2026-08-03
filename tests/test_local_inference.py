@@ -60,10 +60,10 @@ def test_llama_cpp_parser_extracts_first_complete_object() -> None:
     assert parsed["actions"][0]["action"] == "Inspect health"
 
 
-def test_llama_cpp_command_is_cpu_only_and_schema_constrained() -> None:
+def test_llama_cpp_command_is_cpu_only_schema_constrained_and_non_chat() -> None:
     planner = LlamaCppPlanner(
         Settings(
-            llama_cpp_binary="/opt/llama-cli",
+            llama_cpp_binary="/opt/llama-completion",
             llama_cpp_model_path="/models/qwen-q4.gguf",
             llama_cpp_threads=4,
         )
@@ -71,13 +71,15 @@ def test_llama_cpp_command_is_cpu_only_and_schema_constrained() -> None:
 
     command = planner._command("Plan safely")
 
-    assert command[0] == "/opt/llama-cli"
+    assert command[0] == "/opt/llama-completion"
     assert command[command.index("--model") + 1] == "/models/qwen-q4.gguf"
     assert command[command.index("--device") + 1] == "none"
     assert command[command.index("--n-gpu-layers") + 1] == "0"
     assert command[command.index("--threads") + 1] == "4"
-    assert "--conversation" in command
-    assert "--single-turn" in command
+    assert "--conversation" not in command
+    assert "--no-conversation" in command
+    assert "--single-turn" not in command
+    assert "--reasoning" not in command
     assert "--no-warmup" in command
     schema = json.loads(command[command.index("--json-schema") + 1])
     assert schema["properties"]["actions"]["minItems"] == 3
@@ -85,7 +87,7 @@ def test_llama_cpp_command_is_cpu_only_and_schema_constrained() -> None:
 
 def test_llama_cpp_missing_json_reports_bounded_runtime_diagnostics(monkeypatch) -> None:
     settings = Settings(
-        llama_cpp_binary="/opt/llama-cli",
+        llama_cpp_binary="/opt/llama-completion",
         llama_cpp_model_path="/models/qwen-q4.gguf",
     )
     request = PlanRequest(
@@ -107,7 +109,7 @@ def test_llama_cpp_missing_json_reports_bounded_runtime_diagnostics(monkeypatch)
 @pytest.mark.asyncio
 async def test_local_inference_plan_retains_guardrails(monkeypatch) -> None:
     settings = Settings(
-        llama_cpp_binary="/opt/llama-cli",
+        llama_cpp_binary="/opt/llama-completion",
         llama_cpp_model_path="/models/qwen-q4.gguf",
     )
     request = PlanRequest(

@@ -50,7 +50,7 @@ def test_dashboard_and_health_are_available(tmp_path) -> None:
 def test_status_discloses_local_arm_inference(tmp_path) -> None:
     settings = Settings(
         database_url=f"sqlite:///{tmp_path / 'local-inference.db'}",
-        llama_cpp_binary="/opt/llama-cli",
+        llama_cpp_binary="/opt/llama-completion",
         llama_cpp_model_path="/models/qwen-q4.gguf",
         llama_cpp_model_name="Qwen2.5-0.5B-Instruct Q4_0 + KleidiAI",
     )

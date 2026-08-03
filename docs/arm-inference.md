@@ -37,15 +37,15 @@ Generated models, source builds, and raw artifacts remain gitignored. The CI art
 
 ## Use local planning
 
-Build a CPU-only `llama-cli`, download a compatible instruction model, then set:
+Build a CPU-only `llama-completion`, download a compatible instruction model, then set:
 
 ```text
-LLAMA_CPP_BINARY=/opt/llama.cpp/build/bin/llama-cli
+LLAMA_CPP_BINARY=/opt/llama.cpp/build/bin/llama-completion
 LLAMA_CPP_MODEL_PATH=/opt/models/qwen2.5-0.5b-instruct-q4_0.gguf
 LLAMA_CPP_MODEL_NAME=Qwen2.5-0.5B-Instruct Q4_0 + KleidiAI
 LLAMA_CPP_THREADS=4
 ```
 
-When both paths are configured, local inference takes precedence over Gemini. The model receives a bounded, normalized governed-context excerpt rather than raw MCP output. `llama-cli` is invoked without a shell, with a strict JSON schema, deterministic sampling, CPU-only flags, a timeout, and captured output. Cloud Steward then validates the result and reapplies its non-negotiable guardrails.
+When both paths are configured, local inference takes precedence over Gemini. The model receives a bounded, normalized governed-context excerpt rather than raw MCP output. `llama-completion` is invoked without a shell, with conversation mode disabled, a strict JSON schema, deterministic sampling, CPU-only flags, a timeout, and captured output. This avoids feeding chat-template role markers into the JSON grammar. Cloud Steward then validates the result and reapplies its non-negotiable guardrails.
 
 This repository does not distribute the Qwen model or `llama.cpp` binaries. Qwen2.5-0.5B-Instruct-GGUF is Apache-2.0; `llama.cpp` is MIT; KleidiAI carries its upstream license notices.

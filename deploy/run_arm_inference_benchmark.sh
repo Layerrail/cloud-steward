@@ -25,9 +25,9 @@ done
 mkdir -p "$WORK/models" "$RAW" "$OUT"
 LLAMA="$WORK/llama.cpp"
 BASE_BENCH="$LLAMA/build/base/bin/llama-bench"
-BASE_CLI="$LLAMA/build/base/bin/llama-cli"
+BASE_COMPLETION="$LLAMA/build/base/bin/llama-completion"
 KLEIDI_BENCH="$LLAMA/build/kleidiai/bin/llama-bench"
-KLEIDI_CLI="$LLAMA/build/kleidiai/bin/llama-cli"
+KLEIDI_COMPLETION="$LLAMA/build/kleidiai/bin/llama-completion"
 
 if [[ "$STAGE" != "smoke" ]]; then
 echo "[arm-bench] Capturing native runner metadata"
@@ -99,10 +99,10 @@ CMAKE_ARGS=(
 
 echo "[arm-bench] Building regular CPU baseline"
 cmake -S "$LLAMA" -B "$LLAMA/build/base" "${CMAKE_ARGS[@]}" -DGGML_CPU_KLEIDIAI=OFF
-cmake --build "$LLAMA/build/base" --target llama-bench llama-cli --parallel "$THREADS"
+cmake --build "$LLAMA/build/base" --target llama-bench llama-completion --parallel "$THREADS"
 echo "[arm-bench] Building Arm KleidiAI backend"
 cmake -S "$LLAMA" -B "$LLAMA/build/kleidiai" "${CMAKE_ARGS[@]}" -DGGML_CPU_KLEIDIAI=ON
-cmake --build "$LLAMA/build/kleidiai" --target llama-bench llama-cli --parallel "$THREADS"
+cmake --build "$LLAMA/build/kleidiai" --target llama-bench llama-completion --parallel "$THREADS"
 
 echo "[arm-bench] Proving runtime KleidiAI Q4 kernel activation"
 "$KLEIDI_BENCH" \
@@ -147,16 +147,16 @@ if [[ "$STAGE" == "measure" ]]; then
   exit 0
 fi
 
-for required in "$BASE_CLI" "$KLEIDI_CLI" "$FP16" "$Q4"; do
+for required in "$BASE_COMPLETION" "$KLEIDI_COMPLETION" "$FP16" "$Q4"; do
   test -f "$required"
 done
 
 echo "[arm-bench] Running equivalent Cloud Steward safety-quality smoke tests"
 python "$ROOT/deploy/arm_inference_smoke.py" \
-  --binary "$BASE_CLI" --model "$FP16" --label baseline-fp16 \
+  --binary "$BASE_COMPLETION" --model "$FP16" --label baseline-fp16 \
   --threads "$THREADS" --output "$RAW/smoke-baseline-fp16.json"
 python "$ROOT/deploy/arm_inference_smoke.py" \
-  --binary "$KLEIDI_CLI" --model "$Q4" --label kleidiai-q4 \
+  --binary "$KLEIDI_COMPLETION" --model "$Q4" --label kleidiai-q4 \
   --threads "$THREADS" --output "$RAW/smoke-kleidiai-q4.json"
 
 echo "[arm-bench] Normalizing measurements and checksums"
